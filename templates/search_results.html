@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %} Search Results {% endblock %}
+
+{% block content %}
+   <main class= "genre-content"><br>
+
+        <h1>Search Results for "{{ query }}"</h1>
+        <div class="results">
+            {% if results %}
+                <ul>
+                    {% for result in results %}
+                        {% if loop.first %}
+                            <li class="audio-player">
+                                <img src="{{ result.image }}" alt="{{ result.title }}">
+                                <div>
+                                    <h2>{{ result.title }}</h2>
+                                    <p>{{ result.artist }}</p>
+                                    {% if result.preview_url %}
+                                        <audio controls>
+                                            <source src="{{ result.preview_url }}" type="audio/mpeg">
+                                            Your browser does not support the audio element.
+                                        </audio>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% else %}
+                            <li>
+                                <img src="{{ result.image }}" alt="{{ result.title }}">
+                                <div>
+                                    <h2>{{ result.title }}</h2>
+                                    <p>{{ result.artist }}</p>
+                                    <div class="play-button">
+                                        <i class="material-icons">play_arrow</i>
+                                    </div>
+                                </div>
+                                {% if result.preview_url %}
+                                    <audio class="preview-audio" src="{{ result.preview_url }}"></audio>
+                                {% endif %}
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No results found.</p>
+            {% endif %}
+        </div>
+    </main>
+
+
+    <script>
+        document.getElementById('menu').addEventListener('click', function() {
+            const sidebar = document.querySelector('.side-bar');
+            sidebar.classList.toggle('show');
+        });
+
+        document.getElementById('logout-button').addEventListener('click', function() {
+            window.location.href = '/logout';
+        });
+
+        let cameraOn = true;
+        document.getElementById('camera-icon').addEventListener('click', function() {
+            const cameraIcon = document.getElementById('camera-icon');
+            if (cameraOn) {
+                cameraIcon.innerText = 'videocam_off';
+                console.log("Camera turned off");
+            } else {
+                cameraIcon.innerText = 'videocam';
+                console.log("Camera turned on");
+            }
+            cameraOn = !cameraOn;
+        });
+
+        document.querySelectorAll('.play-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const audio = this.closest('li').querySelector('.preview-audio');
+                if (audio.paused) {
+                    audio.play();
+                    this.innerHTML = '<i class="material-icons">pause</i>';
+                } else {
+                    audio.pause();
+                    this.innerHTML = '<i class="material-icons">play_arrow</i>';
+                }
+            });
+        });
+    </script>
+{% endblock %}

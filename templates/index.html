@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %} Homepage {% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="emotionimagerow">
+        <!-- Emotion detection start -->
+        <div class="image-container">
+            <h1>Video Stream</h1>
+            <img id="video" src="{{ url_for('video_feed') }}" alt="Video Stream">
+        </div>
+        <!-- Emotion detection end -->
+
+        <!-- Current playing song start -->
+        <div class="playingsong-card">
+            <img id="songImage" src="https://img.youtube.com/vi/zUwB_imVjmg/maxresdefault.jpg" alt="Currently playing song">
+            <div class="playingsong-info">
+                <h3 id="songTitle">Song Title 1</h3>
+                <p id="songArtist">Artist 1</p>
+            </div>
+        </div>
+        <!-- Current playing song end -->
+    </div>
+
+    <div class="suggested-songs">
+        <h2>Suggested Songs</h2>
+        <div class="songs-carousel" id="songsCarousel">
+            <!-- Song Cards will be dynamically inserted here -->
+        </div>
+    </div>
+</div>
+<script src="static/js/playsong.js" defer></script>
+<script>
+    // Access webcam and display video stream
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+            const video = document.getElementById('video');
+            video.srcObject = stream;
+            video.play();
+        })
+        .catch(function(error) {
+            console.log("Error accessing webcam:", error);
+        });
+
+    let offset = 0;  // To keep track of loaded songs
+    let emotion = 'happy';
+
+    // Fetch tracks based on emotion, offset, and limit
+    async function getTracks(emotion, offset = 0, limit = 50) {
+        const response = await fetch('/get_tracks', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ emotion, offset, limit })
+        });
+        const tracks = await response.json();
+        return tracks;
+    }
+    
+    // Function to create song card element
+    function createSongCard(song) {
+        const songCard = document.createElement('div');
+        songCard.classList.add('song-card');
+        songCard.onclick = () => playSong(song);
+        songCard.innerHTML = `
+            <img src="${song.image}" alt="${song.title}">
+            <div class="song-info">
+                <h3>${song.title}</h3>
+                <p>${song.artist}</p>
+            </div>
+        `;
+        return songCard;
+    }
+    
+ 
+    
+    // Load more songs into the carousel
+    async function loadMoreSongs() {
+        const songsCarousel = document.getElementById('songsCarousel');
+        const tracks = await getTracks(emotion, offset);
+        tracks.forEach(track => {
+            const songCard = createSongCard(track);
+            songsCarousel.appendChild(songCard);
+        });
+        offset += tracks.length;  // Update the offset
+    }
+    
+    // Initial load
+    loadMoreSongs();
+    
+    // Infinite scroll logic
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                loadMoreSongs();
+            }
+        });
+    }, { root: null, rootMargin: '0px', threshold: 1.0 });
+    
+    observer.observe(document.getElementById('songsCarousel'));
+
+    // Update the currently playing song
+    function updatePlayingSong(song) {
+        document.getElementById('songTitle').textContent = song.title;
+        document.getElementById('songArtist').textContent = song.artist;
+        document.getElementById('songImage').src = song.image;
+    }
+
+    // Fetch and display a random song based on emotion
+    async function fetchAndDisplaySong(emotion) {
+        const tracks = await getTracks(emotion);
+        if (tracks.length > 0) {
+            const song = tracks[Math.floor(Math.random() * tracks.length)];
+            updatePlayingSong(song);
+            displaySuggestedSongs(tracks);
+        } else {
+            console.error(`No songs available for the emotion: ${emotion}`);
+        }
+    }
+
+    // Detect emotion and update songs periodically
+    async function detectEmotion() {
+        const response = await fetch('/emotion');
+        const data = await response.json();
+        const emotion = data.emotion;
+        fetchAndDisplaySong(emotion);
+    }
+
+    function displaySuggestedSongs(tracks) {
+        const songsCarousel = document.getElementById('songsCarousel');
+        songsCarousel.innerHTML = '';
+
+        tracks.forEach(track => {
+            const songCard = createSongCard(track);
+            songsCarousel.appendChild(songCard);
+        });
+    }
+    async function playSong(track) {
+        const response = await fetch('/play_song', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(track)
+        });
+        if (response.redirected) {
+            window.location.href = response.url;
+        }
+    }
+    // Periodically check for emotion
+    setInterval(detectEmotion, 5000); // Adjust the interval as needed
+</script>
+{% endblock %}

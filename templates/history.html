@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Musa -Genres {% endblock %}
+
+{% block content %}
+<div class ="content">
+    <br><br>
+    <h1>Your Song History</h1>
+    <ul>
+        {% for song in history %}
+        <li>{{ song.title }} by {{ song.artist }} - Emotion: {{ song.emotion }} - Played on: {{ song.timestamp }}</li>
+        {% endfor %}
+    </ul>
+</div>
+    {% endblock %}

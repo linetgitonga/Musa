@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Genres - Musa{% endblock %}
+
+{% block content %}
+<div class="genre-content">
+    <br><br><br><br>
+    <h2>Select a Genre</h2>
+    <div class="genres-container">
+        <div class="genres-list" id="genresList">
+            <!-- Genre cards will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <div class="songs-by-genre">
+        <h2>Songs</h2>
+        <div class="songs-carousel" id="songsCarousel">
+            <!-- Song cards will be dynamically inserted here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    const genres = ["Pop", "Afro", "Jazz", "Hip-Hop", "K-Pop", "Country", "House", "Blues", "indie pop", "Metal"];
+
+    function createGenreCard(genre) {
+        const genreCard = document.createElement('div');
+        genreCard.classList.add('genre-card');
+        genreCard.innerHTML = `<h3>${genre}</h3>`;
+        genreCard.onclick = () => fetchSongsByGenre(genre);
+        return genreCard;
+    }
+
+    function loadGenres() {
+        const genresList = document.getElementById('genresList');
+        genres.forEach(genre => {
+            const genreCard = createGenreCard(genre);
+            genresList.appendChild(genreCard);
+        });
+    }
+
+    function createSongCard(song) {
+        const songCard = document.createElement('div');
+        songCard.classList.add('song-card');
+        songCard.onclick = () => playSong(song);  // Assuming you have a playSong function to handle this
+        songCard.innerHTML = `
+            <img src="${song.image}" alt="${song.title}">
+            <div class="song-info">
+                <h3>${song.title}</h3>
+                <p>${song.artist}</p>
+            </div>
+        `;
+        return songCard;
+    }
+
+    function fetchSongsByGenre(genre) {
+        fetch('/songs_by_genre', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ genre: genre, limit: 1000 })
+        })
+        .then(response => response.json())
+        .then(songs => {
+            const songsCarousel = document.getElementById('songsCarousel');
+            songsCarousel.innerHTML = '';  // Clear previous songs
+
+            songs.forEach(song => {
+                const songCard = createSongCard(song);
+                songsCarousel.appendChild(songCard);
+            });
+        })
+        .catch(error => console.error('Error fetching songs by genre:', error));
+    }
+
+    // Initial load
+    loadGenres();
+    async function playSong(track) {
+        const response = await fetch('/play_song', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(track)
+        });
+        if (response.redirected) {
+            window.location.href = response.url;
+        }
+    }
+
+</script>
+{% endblock %}

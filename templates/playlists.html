@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}{{ playlist_name }}{% endblock %}
+
+{% block content %}
+<div class="content">
+    <br><br>
+    <h2>{{ playlist_name }}</h2>
+    <div class="songs-list">
+        {% for song in songs %}
+        <div class="song-card">
+            <img src="{{ song.image }}" alt="{{ song.title }}">
+            <div class="song-info">
+                <h3>{{ song.title }}</h3>
+                <p>{{ song.artist }}</p>
+                <audio controls>
+                    <source src="{{ song.audio }}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+                <div class="song-actions">
+                    <button onclick="likeSong('{{ song.id }}')">Like</button>
+                    <button onclick="removeSongFromPlaylist('{{ playlist_id }}', '{{ song.id }}')">Remove</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <button id="share-playlist-button">Share Playlist</button>
+</div>
+
+<script>
+    function likeSong(songId) {
+        fetch(`/like_song/${songId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Song liked successfully!');
+                } else {
+                    alert('Error liking the song: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function removeSongFromPlaylist(playlistId, songId) {
+        fetch(`/remove_song_from_playlist`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ playlist_id: playlistId, song_id: songId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Song removed from playlist!');
+                location.reload();
+            } else {
+                alert('Error removing the song from playlist: ' + data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    document.getElementById('share-playlist-button').addEventListener('click', () => {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            alert('Playlist URL copied to clipboard: ' + url);
+        }).catch(error => {
+            console.error('Error copying URL to clipboard:', error);
+        });
+    });
+</script>
+{% endblock %}

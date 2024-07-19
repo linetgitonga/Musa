@@ -1,0 +1,9 @@
+Flask
+Flask-SQLAlchemy
+Flask-Bcrypt
+Flask-Login
+Werkzeug
+requests
+tensorflow
+opencv-python
+numpy

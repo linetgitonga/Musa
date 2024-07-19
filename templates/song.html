@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Song Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="header">
+        <div class="logo left">
+            <i id="menu" class="material-icons">menu</i>
+            <img src="https://www.freecodecamp.org/news/content/images/2022/01/yt-logo.png" alt="Logo">
+        </div>
+        <div class="search center">
+            <form action="">
+                <input type="text" placeholder="Search" />
+                <button type="submit"><i class="material-icons">search</i></button>
+            </form>
+            <i class="material-icons mic">mic</i>
+        </div>
+        <div class="icons right">
+            <i class="material-icons">videocam</i>
+            <i class="material-icons">apps</i>
+            <i class="material-icons">notifications</i>
+            <i class="material-icons display-this">account_circle</i>
+        </div>
+    </header>
+    <main>
+        <div class="song-details">
+            <h1>{{ song.title }}</h1>
+            <p>{{ song.artist }}</p>
+            <img src="{{ song.image }}" alt="{{ song.title }}">
+            <div class="song-controls">
+                <audio controls>
+                    <source src="{{ song.audio }}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+                <button id="like-button">Like</button>
+                <button id="add-to-playlist-button">Add to Playlist</button>
+            </div>
+            <div class="lyrics">
+                <h2>Lyrics</h2>
+                <p>Lyrics will be shown here...</p>
+            </div>
+            <div class="comments">
+                <h2>Comments</h2>
+                <p>Comments will be shown here...</p>
+            </div>
+        </div>
+    </main>
+    <script>
+        document.getElementById('like-button').addEventListener('click', () => {
+            fetch(`/like_song/{{ song.id }}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => alert(data.message))
+                .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('add-to-playlist-button').addEventListener('click', () => {
+            const playlistName = prompt("Enter playlist name:");
+            if (playlistName) {
+                fetch('/add_to_playlist', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ playlist_name: playlistName, song_id: "{{ song.id }}" })
+                })
+                .then(response => response.json())
+                .then(data => alert(data.message))
+                .catch(error => console.error('Error:', error));
+            }
+        });
+    </script>
+</body>
+</html>

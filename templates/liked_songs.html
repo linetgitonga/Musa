@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Liked Songs{% endblock %}
+
+{% block content %}
+<div class="content">
+    <br><br><br>
+    <h2>Liked Songs</h2>
+    <div class="songs-list">
+        {% for song in songs %}
+        <div class="song-card">
+            <img src="{{ song.image }}" alt="{{ song.title }}">
+            <div class="song-info">
+                <h3>{{ song.title }}</h3>
+                <p>{{ song.artist }}</p>
+                <audio controls>
+                    <source src="{{ song.audio }}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

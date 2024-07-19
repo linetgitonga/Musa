@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Musa -Genres {% endblock %}
+
+{% block content %}
+<div class="content"><br><br><br>
+    <h1>Billboard Top 50</h1>
+    <div class="trending-list">
+        {% for song in songs %}
+        <div class="trending-song-card">
+            <img src="{{ song.image }}" alt="Thumbnail" class="trending-song-thumbnail">
+            <div class="trending-song-info">
+                <h4>{{ song.title }}</h4>
+                <p>{{ song.artist }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<script>
+    
+</script>
+{% endblock %}
+

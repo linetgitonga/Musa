@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="content">
+<div class="profile-container">
+    <div class="profile-header">
+        <img src="{{ user.profile_picture }}" alt="Profile Picture" class="profile-picture">
+        <h1>{{ user.username }}</h1>
+        <p>{{ user.email }}</p>
+    </div>
+    <div class="profile-body">
+        <h2>About Me</h2>
+        <p>{{ user.bio }}</p>
+        <h2>My Music</h2>
+        <div class="song-list">
+            <h3>Favorite Songs</h3>
+            <ul>
+                {% for song in favorite_songs %}
+                <li>{{ song.title }} by {{ song.artist }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="profile-actions">
+        <a href="{{ url_for('edit_profile') }}" class="btn">Edit Profile</a>
+        <a href="{{ url_for('change_password') }}" class="btn">Change Password</a>
+    </div>
+</div>
+</div>
+
+{% endblock %}

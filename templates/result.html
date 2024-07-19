@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection Result</title>
+</head>
+<body>
+    <h1>Detected Emotion</h1>
+    <div id="emotion-result">
+        <h2>{{ emotion }}</h2>
+        <a href="/">Try Again</a>
+    </div>
+</body>
+</html>
+<!--emotion detectionstart-->
+<div class="image-container">
+    <h1>Video Stream</h1>
+    <img src="{{ url_for('video_feed') }}">
+    <img id="emotion-image" src="{{ url_for('static', filename='emotion.png') }}" alt="Emotion Image">
+</div>
+<!--emotion detection end -->
+<script>
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+            const video = document.getElementById('video');
+            video.srcObject = stream;
+            video.play();
+        })
+        .catch(function(error) {
+            console.log("Error accessing webcam:", error);
+        });
+</script>

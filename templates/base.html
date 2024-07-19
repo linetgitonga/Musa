@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <!-- CSS File -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>{% block title %}Musa{% endblock %}</title>
+    <style>
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .side-bar {
+                display: none;
+            }
+        
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        
+        /* Header styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .search {
+            display: flex;
+            align-items: center;
+        }
+        
+        .icons {
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Profile image styles */
+        .profile-image {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+        }
+        
+        /* User info container */
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+            position: relative;
+        }
+        
+        .user-info span {
+            margin-left: 8px;
+            font-size: 14px;
+        }
+        
+        /* Logout button styles */
+        .logout-button {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            border: none;
+            background-color: #ff0000;
+            color: #ffffff;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        /* Default sidebar styles */
+.side-bar {
+    width: 200px;
+    background-color: #f9f9f9;
+    position: fixed;
+    top: 5;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+/* Hide sidebar on mobile by default */
+.side-bar.hidden {
+    transform: translateX(-100%);
+}
+
+/* Show sidebar on larger screens */
+@media (min-width: 768px) {
+    .side-bar {
+        display: block;
+    }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    .side-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform: translateX(-100%);
+        z-index: 1000;
+        background-color: #ffffff;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .side-bar.show {
+        transform: translateX(0);
+    }
+}
+
+/* Hamburger menu styles for mobile */
+#menu {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    #menu {
+        display: block;
+        cursor: pointer;
+    }
+}
+
+        
+        /* Nav styles */
+        .nav {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            text-decoration: none;
+            color: #333;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        
+        .nav-link i {
+            margin-right: 10px;
+        }
+        
+        .nav-link span {
+            font-size: 14px;
+        }
+        
+        
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo left">
+            <i id="menu" class="material-icons">menu</i>
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+        </div>
+        <div class="search center">
+            <form action="{{ url_for('search') }}" method="GET">
+                <input type="text" name="query" placeholder="Search songs, audios..." />
+                <button type="submit"><i class="material-icons">search</i></button>
+            </form>
+            <i class="material-icons mic">mic</i>
+        </div>
+        <div class="icons right">
+            {% if current_user.is_authenticated %}
+                <div class="user-info" id="profile-info">
+                    {% if current_user.profile_image %}
+                        <img src="{{ url_for('static', filename='images/' ~ current_user.profile_image) }}" alt="Profile Image" class="profile-image">
+                    {% else %}
+                        <i class="material-icons">account_circle</i>
+                    {% endif %}
+                    <span>{{ current_user.username }}</span>
+                </div>
+                <button class="logout-button" id="logout-button">Logout</button>
+            {% else %}
+                <i class="material-icons" id="profile-icon">account_circle</i>
+            {% endif %}
+            <i class="material-icons" id="camera-icon">videocam</i>
+            <i class="material-icons">apps</i>
+            <i class="material-icons">notifications</i>
+        </div>
+    </header>
+
+    <div class="side-bar ">
+        <div class="nav">
+            <a class="nav-link" href="{{ url_for('index') }}">
+                <i class="material-icons">home</i>
+                <span>Home</span>
+            </a>
+            <a class="nav-link" href="{{ url_for('trending') }}">
+                <i class="material-icons">local_fire_department</i>
+                <span>Trending</span>
+            </a>
+            <a class="nav-link" href="#">
+                <i class="material-icons">subscriptions</i>
+                <span>Subscriptions</span>
+            </a>
+            <a class="nav-link" href="{{ url_for('profile') }}">
+                <i class="material-icons">library_add_check</i>
+                <span>Library</span>
+            </a>
+            <a class="nav-link" href="{{ url_for('history') }}">
+                <i class="material-icons">history</i>
+                <span>History</span>
+            </a>
+            <a class="nav-link" href="{{ url_for('genres') }}">
+                <i class="material-icons">library_music</i>
+                <span>Genres</span>
+            </a>
+            <a class="nav-link" href="{{ url_for('playlists') }}">
+                <i class="material-icons">watch_later</i>
+                <span>My Playlists</span>
+            </a>
+            <a class="nav-link" href="{{ url_for('liked_songs') }}">
+                <i class="material-icons">thumb_up</i>
+                <span>Liked videos</span>
+            </a>
+        </div>
+    </div>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        document.getElementById('menu').addEventListener('click', function() {
+            const sidebar = document.querySelector('.side-bar');
+            sidebar.classList.toggle('show');
+        });
+
+        document.getElementById('logout-button').addEventListener('click', function() {
+            window.location.href = '/logout';
+        });
+
+        let cameraOn = true;
+        document.getElementById('camera-icon').addEventListener('click', function() {
+            const cameraIcon = document.getElementById('camera-icon');
+            if (cameraOn) {
+                // Turn off camera
+                cameraIcon.innerText = 'videocam_off';
+                // Add functionality to turn off the camera here
+                console.log("Camera turned off");
+            } else {
+                // Turn on camera
+                cameraIcon.innerText = 'videocam';
+                // Add functionality to turn on the camera here
+                console.log("Camera turned on");
+            }
+            cameraOn = !cameraOn;
+        });
+    </script>
+</body>
+</html>
