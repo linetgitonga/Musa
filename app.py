@@ -258,13 +258,58 @@ def emotion():
 
 
 
-@app.route('/song/<song_id>', methods=['GET'])
-def song(song_id):
-    song = current_song.get(song_id)
-    return render_template('song.html', song=song)
+# # Route for starting a new song
+# @app.route('/play_song', methods=['POST'])
+# def play_song():
+#     if not current_user.is_authenticated:
+#         return jsonify({'message': 'User not logged in!'}), 401
+    
+#     data = request.json
+#     song_id = data.get('id')
+    
+#     if not song_id:
+#         return jsonify({'message': 'Invalid song ID'}), 400
+    
+#     current_song[song_id] = data
+    
+#     return redirect(url_for('song', song_id=song_id))
 
 
+# # Function to get the track's info from Spotify (if necessary)
+# def get_track_info(track_id):
+#     url = f'https://api.spotify.com/v1/tracks/{track_id}'
+#     headers = {
+#         'Authorization': f'Bearer {access_token}'
+#     }
+#     response = requests.get(url, headers=headers)
+    
+#     if response.status_code == 200:
+#         return response.json()
+#     else:
+#         return None
 
+# Function to fetch song info dynamically (including artist_id)
+def get_track_info(track_id):
+    url = f'https://api.spotify.com/v1/tracks/{track_id}'
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        track_info = response.json()
+        return {
+            'id': track_info['id'],
+            'title': track_info['name'],
+            'artist': track_info['artists'][0]['name'],
+            'artist_id': track_info['artists'][0]['id'],  # Artist ID
+            'image': track_info['album']['images'][0]['url'],
+            'audio': track_info['preview_url']
+        }
+    else:
+        return None
+
+# Route for starting a new song and fetching song details from Spotify
 @app.route('/play_song', methods=['POST'])
 def play_song():
     if not current_user.is_authenticated:
@@ -272,10 +317,71 @@ def play_song():
     
     data = request.json
     song_id = data.get('id')
-    current_song[song_id] = data
-    return redirect(url_for('song', song_id=song_id))
     
-   
+    # Fetch song info from Spotify API if it's not in current_song
+    if song_id not in current_song:
+        song_data = get_track_info(song_id)
+        if not song_data:
+            return jsonify({'message': 'Song not found on Spotify!'}), 404
+        
+        current_song[song_id] = song_data  # Store song data
+    
+    return redirect(url_for('song', song_id=song_id))
+
+
+# Function to get suggested songs
+def get_suggested_songs(track_id, limit=10):
+    url = "https://api.spotify.com/v1/recommendations"
+    params = {
+        'seed_tracks': track_id,
+        'limit': limit
+    }
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+    response = requests.get(url, headers=headers, params=params)
+    
+    if response.status_code == 200:
+        return response.json()['tracks']
+    else:
+        return []
+
+# Function to get songs by the artist
+def get_artist_top_tracks(artist_id, country='US'):
+    url = f'https://api.spotify.com/v1/artists/{artist_id}/top-tracks'
+    params = {'market': country}
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+    response = requests.get(url, headers=headers, params=params)
+    
+    if response.status_code == 200:
+        return response.json()['tracks']
+    else:
+        return []
+
+
+@app.route('/song/<song_id>', methods=['GET'])
+def song(song_id):
+    song = current_song.get(song_id)
+    
+    if not song:
+        return "Song not found!", 404
+    
+    # Get suggested songs based on the current song's track ID
+    suggested_songs = get_suggested_songs(song['id'])
+    
+    # Get songs by the same artist
+    artist_id = song.get('artist_id')  # Ensure artist_id exists
+    if not artist_id:
+        return "Artist not found!", 404
+    
+    songs_by_artist = get_artist_top_tracks(artist_id)
+    # Pass everything to the template
+    return render_template('song.html', song=song, suggested_songs=suggested_songs, songs_by_artist=songs_by_artist)
+
+
+
 
 
 @app.route('/history')

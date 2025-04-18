@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Song Details</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='song.css') }}">
 </head>
 <body>
     <header class="header">
@@ -27,6 +27,67 @@
             <i class="material-icons display-this">account_circle</i>
         </div>
     </header>
+    <div class="container">
+        <!-- Left Sidebar for Liked Songs -->
+        <aside class="sidebar left">
+            <h2>Liked Songs</h2>
+            <ul>
+                <!-- Dynamically insert liked songs here -->
+                <li>Song 1</li>
+                <li>Song 2</li>
+                <li>Song 3</li>
+            </ul>
+        </aside>
+
+        <!-- Main Content for Current Song and Songs from the Same Artist -->
+        <main class="main-content">
+            <div class="current-song">
+                <h1>{{ song.title }}</h1>
+                <p>{{ song.artist }}</p>
+                <img src="{{ song.image }}" alt="{{ song.title }}">
+                <audio controls>
+                    <source src="{{ song.audio }}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+            <div class="songs-by-artist">
+                <h2>Songs by {{ song.artist }}</h2>
+                <ul>
+                    {% for track in songs_by_artist %}
+                    <li>
+                        <img src="{{ track.album.images[0].url }}" alt="{{ track.name }}">
+                        <p>{{ track.name }} - {{ track.artists[0].name }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </main>
+
+        <!-- Right Sidebar for Suggested Songs -->
+        <aside class="sidebar right">
+            <h2>Suggested Songs</h2>
+            <ul>
+                {% for track in suggested_songs %}
+                <li>
+                    <img src="{{ track.album.images[0].url }}" alt="{{ track.name }}">
+                    <p>{{ track.name }} - {{ track.artists[0].name }}</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </aside>
+
+        <!-- Fixed Music Player Bar at the Bottom -->
+        <footer class="music-player">
+            <div class="progress-bar">
+                <input type="range" value="0" max="100" class="progress" id="progress-bar">
+            </div>
+            <div class="controls">
+                <button id="prev">Prev</button>
+                <button id="play">Play</button>
+                <button id="next">Next</button>
+            </div>
+        </footer>
+    </div>
     <main>
         <div class="song-details">
             <h1>{{ song.title }}</h1>
